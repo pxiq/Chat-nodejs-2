@@ -16,6 +16,19 @@ $(document).ready(function() {
 		}
 	});
 
+	$("#message-field").keypress(function (event){
+		if (event.which == 13) {
+			var message = $("input.messageField").val();
+			if (message === '' || message === undefined)
+			{
+				$(".error").slideDown();
+			}
+			else {
+				server.emit('messages', message);
+				$(".messageField").val('');
+			}
+		};
+	});
 	// Send message && check value of the field
 	$("button#chat").click(function (e){
 		e.preventDefault();
@@ -41,12 +54,17 @@ $(document).ready(function() {
    	});
 
     server.on('messages', function (data) {
-   		$("div.messages-list").append("<br />"+data);
+   		$("div.messages-list").append("<br />"+ data.user +" : "+ data.mess);
+   		$("div.messages-list").animate({
+   			scrollTop: $("div.messages-list").prop('scrollHeight')
+   		}, 50);
    	});
    	
    	server.on('disconnect', function (user) {
-   		$("li#"+user.id).remove();
-   		$("div.messages-list").append("<br /><p class='text-info'><em>"+ user.name +" is disconnected.</em></p>");
+   		if (user.id != undefined) {
+   			$("li#"+user.id).remove();
+   			$("div.messages-list").append("<br /><p class='text-info'><em>"+ user.name +" is disconnected.</em></p>");
+   		};
    	});
 
 	

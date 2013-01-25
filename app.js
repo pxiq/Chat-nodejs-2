@@ -42,6 +42,7 @@ var z = 0;
 // ------ Socket.io events ---------
 var io = socket.listen(server);
 var users = {};
+var messages = [];
 
 io.sockets.on('connection', function (client){
   
@@ -52,6 +53,12 @@ io.sockets.on('connection', function (client){
       client.emit('new-user', users[user]);
   }
 
+  for (var mess in messages)
+  {
+    console.log(mess);
+    client.emit('messages', messages[mess]);
+  }
+
   client.on('login', function (name){
     current_user.name = name;
     current_user.id = ++z;
@@ -60,7 +67,16 @@ io.sockets.on('connection', function (client){
   });
 
   client.on('messages', function (data) {
-      io.sockets.emit('messages', data);
+    var message = {};
+    message.user = current_user.name;
+    message.mess = data;
+    messages.push(message);
+
+    if (messages.length > 5) {
+        messages.shift();
+    };
+
+    io.sockets.emit('messages', message);
   });
 
   client.on('disconnect', function(){
